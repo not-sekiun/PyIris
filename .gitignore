@@ -1,3 +1,4 @@
+*.png
 *.pyc
 PyIris.cred
 payload.py
