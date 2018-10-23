@@ -17,9 +17,10 @@ def download(data):
         config.logics.append('''
             elif command == "download":
                 download(data)''')
+        config.help_menu['download <Remote file path>'] = 'Remotely download a file to local current working directory of PyIris'
     elif option == 'info':
         print '\nName             : Download File component' \
               '\nOS               : Windows' \
               '\nRequired Modules : pickle' \
-              '\nCommands         : download <remote file path>' \
+              '\nCommands         : download <Remote file path>' \
               '\nDescription      : Remotely download a file to local current working directory of PyIris\n'

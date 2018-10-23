@@ -26,10 +26,24 @@ disk.
 - See all currently open windows on the target
 - Dump saved chrome passwords
 - Take pictures from webcam without writing to disk
-- Compile payloads into Windows EXE or Linux ELF
+- Compile payloads into Windows EXE
 
 # Features (Linux)
-- Coming soon
+- Dynamic generation of scouts
+- Sleep, kill and disconnect scouts
+- Robust error handling
+- Remote Command Execution through bash shell
+- File transfer and data exfiltration
+- Download files through url
+- Keylogging in memory
+- Taking screenshots in memory
+- Setting audio
+- Displaying system information
+- Clear, set, dump clipboard data
+- Check to see if scout is running as root
+- See all currently open windows on the target
+- Take pictures from webcam without writing to disk
+- Compile payloads into Linux ELF
 
 # Getting Started
 ## Prerequisites
@@ -46,17 +60,10 @@ Next, pip install pycaw, which can't be installed the standard way, so you'll ne
 
 ```pip install https://github.com/AndreMiras/pycaw/archive/master.zip```
 
-Then, go to [this site](https://www.lfd.uci.edu/~gohlke/pythonlibs/) and look for the file titled "pyHook-1.5.1-cp27-cp27m-
-win_amd64.whl" which is the wheel for pyHook. Change into the directory of that wheel and run the following command to install pyHook. 
-(Note: Install the correct wheel for your python installation. My python installation is 64 bit so I used the "win_amd64" version of the 
-wheel)
+Finally, install the rest of the required modules the standard way. Only install modules from the "setup/windows/requirements.txt" file 
+as this section is for running the Windows edition of PyIris.
 
-```pip install pyHook-1.5.1-cp27-cp27m-win_amd64.whl```
-
-Finally, install the rest of the required modules the standard way. Only install modules from the "windows_requirements.txt" file as
-this section is for running the Windows edition of PyIris.
-
-```pip install -r windows_requirements.txt```
+```pip install -r setup/windows/requirements.txt```
 
 Upon running it the first time you should be greeted with the option to generate a key, this indicates everything has been installed
 correctly.
@@ -66,6 +73,19 @@ correctly.
 First, clone this repository, make sure you have git installed.
 
 ```git clone https://github.com/angus-y/PyIris-backdoor```
+
+Next install an external dependency, xlib, required by pyperclip.
+
+```sudo apt-get install xclip```
+
+Then install pyalsaaudio through apt-get
+
+```sudo apt-get install python-alsaaudio```
+
+Finally, install the rest of the required modules the standard way. Only install modules from the "setup/linux/requirements.txt" file as
+this section is for running the Linux edition of PyIris.
+
+```pip install -r setup/linux/requirements.txt```
 
 Upon running it the first time you should be greeted with the option to generate a key, this indicated everything has been installed
 correctly.
@@ -80,6 +100,7 @@ Change into the PyIris-backdoor folder first, then run
 - Windows 10
 - Kali Linux
 - Ubuntu
+- Debian
 
 # Basic Usage
 ## Windows
@@ -101,14 +122,19 @@ detail about a specific command, run ```help <name of command>``` to get more in
 
 # FAQ
 
-<details>
-<summary>Why cant the compiled scout I generated in Linux run on Windows? (Or vice versa)</summary>
-<br>
+### Why cant the compiled scout I generated in Linux run on Windows? (Or vice versa)
 PyIris utilizes Pyinstaller to compile its payloads. It is therefore not possible to cross-compile binaries. That means if you 
 generate and compile a scout in Linux the binary only runs in Linux, it works the same for Windows. If you want to cross-compile 
 Windows scouts for Linux I suggest you use wine and run PyIris from there.
-<br><br>
-</details>
+
+### PyHook isnt installing on my Windows OS!
+I have already included a PyHook wheel file in the setup/windows folder however that wheel works only for 64 bit versions of Windows.
+You may have to manually install PyHook yourself. Go to [this site](https://www.lfd.uci.edu/~gohlke/pythonlibs/) and search for the 
+PyHook wheel file that works for your Windows version and download it. Next, pip install using the name of that wheel file.
+
+```pip install <name of pyhook wheel file>```
+
+If you downloaded the correct pyhook wheel file it should install succesfully.
 
 # Built with
 [PyCharm IDE](https://www.jetbrains.com/pycharm/)
@@ -119,7 +145,7 @@ Create an issue, but before that please read the "ISSUE_TEMPLATE.md" file first
 # Credits
 - Inspired by [Powershell Empire](https://github.com/EmpireProject/Empire) and [Brain Damage](https://github.com/mehulj94/BrainDamage)
 - Thanks to ev-ev for helping me in the earliest stages of the project and in helping me to create PyIris
-- Thanks to Dharshan2004 for helping build a part of the in-memory webcam module
+- Thanks to Dharshan2004 for helping build a part of the in-memory webcam module and test PyIris on Debian
 
 # License
 Licensed under Mozilla Public License Version 2.0 - See the "LICENESE.md" file for more details

@@ -1,3 +1,13 @@
+# Update 0.6.9
+- Ported most of the windows components to linux some werent ported due to the fact that linux bash shell is much more versatile than windows cmd, eg. you can get user idle time from the terminal alone
+- Fixed a small issue with pinging scouts and detecting dead scouts
+
+# Update 0.6.8
+- Added remote python interpreter code execution component
+- You can now reference a component by id, instead of loading through "load windows/component" you can laod it as "load 1"
+- Refactored some code in the show load and unload part for generator
+- Removed case sensitivity for commands
+
 # Update 0.6.7
 - Added the ability to take pictures from webcam
 - Added the option to auto compile windows scouts into portable executables that are either windowed or packed

