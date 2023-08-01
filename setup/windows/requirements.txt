@@ -7,7 +7,7 @@ Pillow==9.0.1
 PyAutoGUI==0.9.52
 PyInstaller==4.0
 colorama==0.4.4
-cryptography==3.3.2
+cryptography==41.0.3
 pycaw==20181226
 pyreadline==2.1
 pyWinhook==1.6.2
