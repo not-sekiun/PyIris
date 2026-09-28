@@ -218,7 +218,12 @@ class BaseListener(ComponentLifeCycle):
         ...
 
     async def on_running(self) -> None:
-        """Called on each iteration of the listener's main loop while running."""
+        """Run the listener's main loop in a single invocation.
+
+        Returning normally completes the listener and calls `on_completed()`.
+        Long-lived listeners should stay in this hook until work ends or shutdown
+        is requested.
+        """
         ...
 
     async def on_completed(self) -> None:
