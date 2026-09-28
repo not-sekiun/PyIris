@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from typing import Any, get_type_hints
+from typing import Any
 
 from packaging import requirements, specifiers, version
 from pydantic import BaseModel, ValidationError
@@ -112,7 +112,10 @@ class ComponentMetadata:
             if hasattr(cls, "label")
             else f"{cls.__name__} ({resolve_component_filepath(cls)})"
         )
-        expected_attrs_and_types_map = get_type_hints(cls)
+        expected_attrs_and_types_map = {
+            name: field.annotation
+            for name, field in cls._component_metadata_model.model_fields.items()
+        }
 
         # Check all attributes exist
         for attr in expected_attrs_and_types_map.keys():

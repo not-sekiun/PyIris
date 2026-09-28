@@ -10,6 +10,7 @@ from consortium.framework._core.components import (
     ComponentLifeCycleExceptions,
     ComponentLifeCyclePhase,
     ComponentMetadata,
+    ComponentMetadataModel,
     State,
 )
 from consortium.framework._core.components.component_life_cycle import (
@@ -1274,6 +1275,31 @@ def test_metadata_defaults_name_to_label_and_empties_optional_collections():
     assert _Component.compatible_framework_version is None
     assert _Component.authors == set()
     assert _Component.component_dependencies == set()
+
+
+def test_metadata_ignores_instance_annotations_but_checks_model_extensions():
+    class _ExtendedMetadataModel(ComponentMetadataModel):
+        enabled: bool
+
+    class _Component(ComponentMetadata):
+        _component_metadata_model = _ExtendedMetadataModel
+        label = "with-instance-state"
+        enabled = True
+        connection: object
+
+    _Component._validate_metadata()
+    assert _Component.enabled is True
+
+    class _MissingExtension(ComponentMetadata):
+        _component_metadata_model = _ExtendedMetadataModel
+        label = "missing-extension"
+        connection: object
+
+    with pytest.raises(
+        frmwrk_excs.MissingComponentConfigurationParameterError,
+        match="enabled",
+    ):
+        _MissingExtension._validate_metadata()
 
 
 def test_metadata_missing_label_raises_and_names_the_defining_module():
