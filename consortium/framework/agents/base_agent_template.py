@@ -1,3 +1,4 @@
+import copy
 import pathlib
 import uuid
 from collections.abc import Callable
@@ -232,7 +233,7 @@ class BaseAgentTemplate(ComponentMetadata):
         # they fill in as `None`
         for option_name, option in self.options.items():
             if option_name not in parameters:
-                parameters[option_name] = option.default_value
+                parameters[option_name] = copy.deepcopy(option.default_value)
 
         # Validate entire constructed parameter set before creating the agent generator.
         for option_name, value in parameters.items():

@@ -1,3 +1,4 @@
+import copy
 import pathlib
 import uuid
 from abc import ABC, abstractmethod
@@ -262,7 +263,7 @@ class BaseListenerTemplate(ComponentMetadata, ABC):
         # they fill in as `None`
         for option_name, option in self.options.items():
             if option_name not in parameters:
-                parameters[option_name] = option.default_value
+                parameters[option_name] = copy.deepcopy(option.default_value)
 
         # Validate entire constructed parameter set before creating the listener.
         for option_name, value in parameters.items():
