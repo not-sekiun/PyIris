@@ -201,6 +201,7 @@ class DictionaryValueOption(BaseOption[dict[str, Primitive]]):
                 f"Value '{value}' for option '{self.name}' must be a dictionary.",
             )
 
+        value_types = (self.value_type,) if self.value_type else (str, int, float, bool)
         for dict_key, dict_value in value.items():
             # The value of keys in DictionaryValueOption is always a string.
             if not isinstance(dict_key, str):
@@ -227,13 +228,12 @@ class DictionaryValueOption(BaseOption[dict[str, Primitive]]):
                         ),
                         detail=exc.detail,
                     ) from None
-            if self.value_type:
-                if not isinstance(dict_value, self.value_type):
-                    raise OptionValueValidationFrameworkError(
-                        f"Value '{dict_value}' in dictionary value for option "
-                        f"'{self.name}' failed to match its value type validation: "
-                        f"{self.value_type}",
-                    )
+            if not isinstance(dict_value, value_types):
+                raise OptionValueValidationFrameworkError(
+                    f"Value '{dict_value}' in dictionary value for option "
+                    f"'{self.name}' failed to match its value type validation: "
+                    f"{self.value_type or value_types}",
+                )
             if self.value_validating_regex:
                 if re.match(self.value_validating_regex, str(dict_value)) is None:
                     raise OptionValueValidationFrameworkError(

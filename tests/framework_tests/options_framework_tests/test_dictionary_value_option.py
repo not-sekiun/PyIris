@@ -2,6 +2,7 @@ import pytest
 
 from consortium.framework._core.framework_exceptions.options_framework_exceptions import (
     OptionConfigurationError,
+    OptionValueValidationError,
 )
 from consortium.framework.options import DictionaryValueOption
 
@@ -41,6 +42,20 @@ def test_init_with_invalid_default_value():
             value_type=int,
             default_value={"key": "invalid"},
         )
+
+
+def test_validate_heterogeneous_scalar_values_without_value_type():
+    option = DictionaryValueOption(name="settings")
+
+    option.validate_value({"name": "worker", "count": 2, "ratio": 0.5, "enabled": True})
+
+
+@pytest.mark.parametrize("invalid_value", [[], {"nested": []}, None, object()])
+def test_validate_rejects_non_scalar_values_without_value_type(invalid_value):
+    option = DictionaryValueOption(name="settings")
+
+    with pytest.raises(OptionValueValidationError):
+        option.validate_value({"mode": invalid_value})
 
 
 #
