@@ -10,6 +10,9 @@ from consortium.framework._core.framework_exceptions.options_framework_exception
 from consortium.framework._core.utils import resolve_validation_error_parameter
 from consortium.framework.framework_types import Primitive
 from consortium.framework.options._base_option import BaseOption
+from consortium.framework.options._option_value_validators import (
+    validate_value_data_type,
+)
 from consortium.framework.options.option_types import OptionType
 
 
@@ -117,6 +120,7 @@ class ChoiceValueOption(BaseOption[Primitive]):
         Raises:
             OptionValueValidationError: If the value is not one of the available values.
         """
+        validate_value_data_type(self.name, value, str, int, float, bool)
         if value not in self.available_values:
             raise OptionValueValidationFrameworkError(
                 f"Value `{value}` for option `{self.name}` is not one of its available "

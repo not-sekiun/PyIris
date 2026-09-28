@@ -258,11 +258,6 @@ class ListValueOption(BaseOption[list[Primitive]]):
             value,
             list,
         )
-        validate_iterable_element_duplication(
-            option_name=self.name,
-            option_value=value,
-            allow_duplicates=self.allow_duplicates,
-        )
         validate_iterable_value_length(
             option_name=self.name,
             option_value=value,
@@ -276,6 +271,14 @@ class ListValueOption(BaseOption[list[Primitive]]):
                 element,
                 *([self.value_type] if self.value_type else [str, int, float, bool]),
             )
+
+        validate_iterable_element_duplication(
+            option_name=self.name,
+            option_value=value,
+            allow_duplicates=self.allow_duplicates,
+        )
+
+        for element in value:
             validate_value_numeric_range(
                 option_name=self.name,
                 option_value=element,

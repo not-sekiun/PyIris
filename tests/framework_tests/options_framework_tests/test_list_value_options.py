@@ -2,6 +2,7 @@ import pytest
 
 from consortium.framework._core.framework_exceptions.options_framework_exceptions import (
     OptionConfigurationError,
+    OptionValueValidationError,
 )
 from consortium.framework.options import ListValueOption
 
@@ -47,6 +48,14 @@ def test_init_with_invalid_default_value():
             value_type=int,
             default_value=["invalid"],
         )
+
+
+@pytest.mark.parametrize("value", [[{}], [[]]])
+def test_validate_unhashable_element_raises_option_error(value):
+    option = ListValueOption(name="hosts", allow_duplicates=False)
+
+    with pytest.raises(OptionValueValidationError):
+        option.validate_value(value)
 
 
 #
