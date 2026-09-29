@@ -52,12 +52,23 @@ async def on_running(self) -> None:
 ## Accessing services
 
 `self.services` is a namespace that exposes every framework service as an attribute.
-All service method calls are synchronous and return immediately:
+The getters below are synchronous:
 
 ```python
 agents = self.services.agents_service.get_all_agents()
 listeners = self.services.listeners_service.get_all_listeners()
 generators = self.services.agent_generators_service.get_all_agent_generators()
+```
+
+Other operations, including lifecycle changes, component loading and event dispatch,
+are async. Follow each method's signature in the
+[service reference](../../../framework-reference/services/listeners-service-reference.md)
+and await async methods. For example, to start a listener you have selected:
+
+```python
+await self.services.listeners_service.start_listener_by_listener_id(
+    listener_id=listener.listener_id,
+)
 ```
 
 Browse the available services in `consortium/server/services/`. Each file corresponds

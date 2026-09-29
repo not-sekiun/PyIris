@@ -1,9 +1,14 @@
 # Listener Shutdown
 
-`on_stopped()` is called when `stop()` is invoked from outside the listener. The
-stop_event is set before `on_stopped()` runs, so the `await self.stop_event.wait()` in
-the running loop will have already unblocked. Use `on_stopped()` to tear down what
-`on_running()` started: close the server, drain connections, release the port.
+`stop()` transitions a running listener to `STOPPING` and awaits `on_stopped()`.
+Only after the hook succeeds does the framework set `stop_event` and transition to
+`STOPPED`. The running loop may still be waiting on the event while the hook runs.
+Use `on_stopped()` to release resources, but do not wait for the main loop or other
+work that needs `stop_event` to be set: that would deadlock the stop operation.
+
+Raising `ListenerStopError` refuses the stop: the framework restores `RUNNING` and
+leaves the event unset. Check whether stopping is possible before releasing resources
+that the listener needs to keep running.
 
 ```python
     async def on_stopped(self) -> None:

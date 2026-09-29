@@ -25,7 +25,7 @@ initialising.
 | `self.name`                       | `str`                    | Display name set at creation time                              |
 | `self.description`                | `str`                    | Description set at creation time                               |
 | `self.endpoint`                   | `str`                    | Network endpoint derived by `resolve_listener_endpoint`        |
-| `self.listener_type`              | `BaseListenerType`       | Type descriptor (class attribute)                              |
+| `self.listener_type`              | `BaseListenerType`       | Property derived from this instance's creating template        |
 | `self.parameters`                 | `dict`                   | Resolved option values from the template                       |
 | `self.datetime_created`           | `datetime`               | Creation timestamp                                             |
 | `self.environment`                | `SimpleNamespace`        | Mutable runtime state; use this instead of instance attributes |
@@ -35,7 +35,7 @@ initialising.
 | `self.status`                     | `Status`                 | Lifecycle status; `.state` holds the current state string      |
 | `self.logger`                     | `loguru.Logger`          | Listener-scoped logger                                         |
 | `self.services`                   | namespace                | All framework services                                         |
-| `self.creating_listener_template` | `BaseListenerTemplate`   | Template that created this instance (class attribute)          |
+| `self.creating_listener_template` | `BaseListenerTemplate`   | Template bound to this instance by `create_listener()`          |
 
 ## ConnectedAgentsService methods
 

@@ -37,7 +37,17 @@ active_listener_count = sum(
 )
 ```
 
-Service calls are synchronous and should be used in `on_triggered()` without awaiting.
+The getter above is synchronous. Other service methods, including lifecycle changes
+and event dispatch, are async and must be awaited from `on_triggered()`. Follow the
+method's signature in the
+[service reference](../../../framework-reference/services/listeners-service-reference.md).
+For example, to start a listener you have selected:
+
+```python
+await self.services.listeners_service.start_listener_by_listener_id(
+    listener_id=listener.listener_id,
+)
+```
 
 ## What lives on self
 

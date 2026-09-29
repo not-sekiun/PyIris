@@ -83,8 +83,11 @@ class DownloadCapability(BaseAgentCapability):
 
             msg_type = msg.data.get("type")
             if msg_type == "chunk":
-                chunks.append(msg.payload.data)
-                received += len(msg.payload.data)
+                if msg.payload is None:
+                    return Failure(message="Chunk message has no payload.")
+                chunk = await msg.payload.read()
+                chunks.append(chunk)
+                received += len(chunk)
                 pct = round(received / total_bytes * 100, 1) if total_bytes else 0
                 self.event_logger.update_progress(
                     message=f"Downloading '{filename}': {received}/{total_bytes} bytes",
@@ -117,6 +120,10 @@ async def on_launch(self, task_launch_message):
 
 Common uses: stripping server-side arguments before the agent sees them, mutating
 arguments based on the agent's known state, or aborting a task that cannot proceed.
+
+`self.task_launch_message` is a copy of the incoming message captured before
+`on_launch()` runs. Changes made by this hook, including returning a replacement
+message, are sent to the agent but are not reflected in that snapshot.
 
 ## on_execute
 
@@ -160,10 +167,11 @@ The object returned by `recv_from_agent()`:
 | `data`    | `dict`            | Structured result payload                           |
 | `payload` | `Payload \| None` | Optional binary output                              |
 
-For an in-memory payload, `payload.data` returns the raw bytes synchronously. For a
-streamed payload it raises `ValueError`; use `await payload.load()` to buffer the whole
-stream into memory, or iterate over `payload` asynchronously when it should remain
-streamed.
+When a payload is present, use `await payload.read()` to obtain all its bytes, or
+`async for chunk in payload` to process it incrementally. Both work whether its
+storage is in memory or on disk. `payload.size` reports the byte count without
+reading the contents. Reading the whole payload materializes it in memory; prefer
+iteration when the whole byte sequence is not needed at once.
 
 ## Success and Failure
 
@@ -187,7 +195,7 @@ return Failure(task_output_message=header)   # wrap an existing message model
 | `self.supported_oses`          | `set[SupportedOS]`               | Platform restrictions                                                  |
 | `self.options`                 | `dict`                           | Name-keyed option definitions (converted from set at class definition) |
 | `self.mitre_attack_techniques` | `list`                           | Resolved MITRE ATT&CK technique objects                                |
-| `self.task_launch_message`     | `TaskLaunchMessageModel \| None` | The message sent on the most recent `execute()` call                   |
+| `self.task_launch_message`     | `TaskLaunchMessageModel \| None` | Input snapshot captured by the most recent `execute()` before `on_launch()` |
 | `self.agent`                   | `Agent`                          | The agent this execution is running against                            |
 | `self.task`                    | `Task`                      | The task record for this execution, including its identity and task-scoped state       |
 | `self.services`                | namespace                        | All framework services                                                 |

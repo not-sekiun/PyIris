@@ -1,10 +1,11 @@
 # Plugin Shutdown
 
-`on_stopped()` is called when `stop()` is invoked from outside the plugin. The
-stop_event
-is set before `on_stopped()` is called, so any `await self.stop_event.wait()` in the
-running loop will have already unblocked. Use `on_stopped()` for final cleanup: flushing
-buffers, closing connections, writing final state to disk.
+`stop()` transitions a running plugin to `STOPPING` and awaits `on_stopped()`.
+Only after the hook succeeds does the framework set `stop_event` and transition to
+`STOPPED`. The running loop may still be waiting on the event while the hook runs.
+Use `on_stopped()` for cleanup such as flushing buffers or writing state. Do not wait
+for the main loop or other work that needs `stop_event` to be set: that would deadlock
+the stop operation.
 
 ```python
 async def on_stopped(self) -> None:
@@ -14,7 +15,9 @@ async def on_stopped(self) -> None:
     )
 ```
 
-Raise `PluginStopError` if the stop cannot complete cleanly:
+Raise `PluginStopError` to refuse the stop. The framework restores `RUNNING` and
+leaves `stop_event` unset, so check whether stopping is possible before releasing
+resources the plugin needs to keep running:
 
 ```python
 async def on_stopped(self) -> None:

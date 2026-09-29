@@ -15,17 +15,19 @@ sequenceDiagram
     WS-->>C: Event A JSON data sent
     E-->>WS: Event A occurs
     C->>+WS: Subscription action command (Subscribe to event B)
+    WS-->>C: Event A JSON data sent
     WS-->>-C: Action command response
     E-->>WS: Event B occurs
     WS-->>C: Event B JSON data sent
-    WS-->>C: Event A JSON data sent
 ```
 
 Key behaviors:
 
 1. Events can arrive at any time in any order. Build your client to handle this.
-2. The first message after sending an action command is always the response to that
-   command. A subscribed event will never arrive before its subscription response.
+2. Events and action responses share the connection. An event can arrive while you
+   wait for a response, so dispatch messages by `type` instead of assuming the next
+   message is the reply. Keep one action outstanding at a time: responses do not
+   contain a request ID.
 3. Each websocket connection is independent. The same client can open multiple
    connections, each with its own set of subscriptions. Tickets are single use, so each
    of those connections needs its own freshly issued ticket.
@@ -108,15 +110,11 @@ succeeded.
 
 ## Available Events
 
-Event strings must be provided in uppercase exactly as shown.
-
-| Event          | Description                      |
-|----------------|----------------------------------|
-| `START_SERVER` | Triggers when the server starts. |
-| `STOP_SERVER`  | Triggers when the server stops.  |
-
-!!! warning
-    The events list is not finalized and will change.
+Use the identifiers from the
+[framework event catalog](../../framework-api/event-hooks/event-types.md), including
+agent, listener, task, user-session and resource events. Event strings are uppercase
+and case-sensitive. Query `get_all_events` for the identifiers supported by the
+connected server.
 
 ## Subscribing to Events
 
@@ -149,6 +147,19 @@ def get_ticket(jwt: str, ticket_url: str) -> str:
     return response.json()["ticket"]
 
 
+async def receive_response(ws, on_event) -> dict:
+    while True:
+        message = json.loads(await ws.recv())
+        if message["type"] == "response":
+            return message
+        if message["type"] == "event":
+            on_event(message)
+
+
+def on_event(message: dict) -> None:
+    print(f"Event received: {message}")
+
+
 async def main() -> None:
     jwt = get_jwt(USERNAME, PASSWORD, AUTHORIZATION_URL)
     ticket = get_ticket(jwt, TICKET_URL)
@@ -158,18 +169,18 @@ async def main() -> None:
             "action": "subscribe",
             "events": ["START_SERVER", "STOP_SERVER"],
         }))
-        response = json.loads(await ws.recv())
+        response = await receive_response(ws, on_event)
 
         if not response["success"]:
             for error in response["errors"]:
-                print(f"Error: {error['code']} — {error['message']}")
+                print(f"Error: {error['code']} - {error['message']}")
             return
 
         print("Subscribed. Waiting for events...")
         async for raw_message in ws:
             message = json.loads(raw_message)
             if message["type"] == "event":
-                print(f"Event received: {message}")
+                on_event(message)
 
 
 if __name__ == "__main__":
@@ -178,12 +189,16 @@ if __name__ == "__main__":
 
 ## Unsubscribing from Events
 
+The snippets below reuse `receive_response` and `on_event` from the example above.
+Run them from the connection's sole receive loop, before resuming event listening;
+do not call `recv()` concurrently from another task.
+
 ```py title="unsubscribe_example.py"
 await ws.send(json.dumps({
     "action": "unsubscribe",
     "events": ["START_SERVER"],
 }))
-response = json.loads(await ws.recv())
+response = await receive_response(ws, on_event)
 
 if response["success"]:
     print("Unsubscribed successfully.")
@@ -195,19 +210,24 @@ else:
 ## Querying Subscriptions
 
 ```py title="query_subscriptions.py"
+async def query_events(ws, action: str) -> list[str]:
+    await ws.send(json.dumps({"action": action}))
+    response = await receive_response(ws, on_event)
+    if not response["success"]:
+        raise RuntimeError(response["errors"])
+    return response["data"]
+
+
 # All events the API supports
-await ws.send(json.dumps({"action": "get_all_events"}))
-all_events = json.loads(await ws.recv())["data"]
-print("All events:", all_events)  # e.g. ["START_SERVER", "STOP_SERVER"]
+all_events = await query_events(ws, "get_all_events")
+print("All events:", all_events)
 
 # Events this connection is subscribed to
-await ws.send(json.dumps({"action": "get_subscribed_events"}))
-subscribed = json.loads(await ws.recv())["data"]
+subscribed = await query_events(ws, "get_subscribed_events")
 print("Subscribed:", subscribed)
 
 # Events this connection is not subscribed to
-await ws.send(json.dumps({"action": "get_unsubscribed_events"}))
-not_subscribed = json.loads(await ws.recv())["data"]
+not_subscribed = await query_events(ws, "get_unsubscribed_events")
 print("Not subscribed:", not_subscribed)
 ```
 
@@ -219,9 +239,10 @@ are two common approaches.
 
 ### Approach 1: One websocket per event type
 
-Open a separate connection for each event. Every message on that connection is
-guaranteed to be the subscribed event, no routing logic needed. Each of those
-connections mints its own ticket: a ticket authenticates one handshake only.
+Open a separate connection for each event. Every pushed event on that connection
+has the subscribed type, so it needs only one event handler. Action responses still
+arrive on the same connection and must be distinguished from events. Each connection
+mints its own ticket: a ticket authenticates one handshake only.
 
 ```py title="one_ws_per_event.py"
 import asyncio
@@ -254,10 +275,12 @@ async def listen_for_event(jwt: str, event_type: str) -> None:
 
     async with websockets.connect(f"{EVENTS_API_URL}?ticket={ticket}") as ws:
         await ws.send(json.dumps({"action": "subscribe", "events": [event_type]}))
-        await ws.recv()  # discard subscription response
         async for raw_message in ws:
             message = json.loads(raw_message)
-            if message["type"] == "event":
+            if message["type"] == "response":
+                if not message["success"]:
+                    raise RuntimeError(message["errors"])
+            elif message["type"] == "event":
                 print(f"[{event_type}] {message}")
 
 
@@ -327,15 +350,15 @@ async def listen(jwt: str, handlers: dict[str, EventHandler]) -> None:
             "action": "subscribe",
             "events": list(handlers.keys()),
         }))
-        await ws.recv()  # discard subscription response
-
         async for raw_message in ws:
             message = json.loads(raw_message)
+            if message["type"] == "response":
+                if not message["success"]:
+                    raise RuntimeError(message["errors"])
+                continue
             if message["type"] != "event":
                 continue
-            # The field that identifies the event type within the payload depends on
-            # the event. Refer to the specific event's documentation.
-            event_type = message.get("event_type")
+            event_type = message["event_type"]
             handler = handlers.get(event_type)
             if handler:
                 handler(message)

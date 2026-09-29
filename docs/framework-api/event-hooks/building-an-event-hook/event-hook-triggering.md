@@ -102,12 +102,12 @@ async def on_triggered(self, event) -> None:
     asyncio.create_task(self._send_webhook(event))
 ```
 
-Be careful when using `create_task()` from a hook: the task runs independently and any
-exception it raises will not be caught by the events service, so it will not be
-reported as an `EventHookTriggerError` (see below). Wrap the body in a try/except if the
-task can fail, and raise `EventHookTriggerError` from within that try/except if you
-still
-want the failure reported through the framework.
+The task runs independently, so the events service cannot collect its failures.
+Raising `EventHookTriggerError` inside that task does not change this. To use the
+framework's structured failure reporting, await the work within `on_triggered()`
+and raise the signal exception there (see below). If work must outlive the trigger,
+keep its task reference and handle its failures explicitly, for example by logging
+them inside the background coroutine.
 
 Note also that a task created this way is not cancelled when the trigger is, so it can
 outlive server shutdown. Keep a reference to it and cancel it in `on_teardown()` if that

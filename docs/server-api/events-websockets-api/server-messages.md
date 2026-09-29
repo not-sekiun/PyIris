@@ -56,16 +56,27 @@ Each error object:
 
 ## Event (`type: "event"`)
 
-Pushed to the client whenever a subscribed event fires on the server. The `type` field
-is always `"event"`. Fields beyond `type` depend on the specific event — refer to each
-event's documentation.
+Pushed to the client whenever a subscribed event fires on the server. Every event
+uses the same envelope; the contents of `data` depend on the event type.
 
 ```json title="Event message (envelope only)"
 {
-  "type": "event"
+  "type": "event",
+  "event_type": "AGENT_CHECKED_IN",
+  "message": "Human-readable description of the event.",
+  "data": {}
 }
 ```
 
+| Field        | Type      | Description                                               |
+|--------------|-----------|-----------------------------------------------------------|
+| `type`       | `"event"` | Identifies a pushed event rather than an action response. |
+| `event_type` | string    | Framework event identifier used to route the event.       |
+| `message`    | string    | Human-readable description; may be empty.                 |
+| `data`       | object    | Event-specific data; may be empty.                        |
+
 !!! warning
-    Event payload fields are not yet finalized and will be documented per event type
-    once stable.
+    Event-specific `data` schemas are still evolving. See the
+    [framework event catalog](../../framework-api/event-hooks/event-types.md) for
+    event identifiers and descriptions, and use `get_all_events` to query the
+    connected server's supported identifiers.

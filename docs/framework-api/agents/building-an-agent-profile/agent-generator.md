@@ -185,4 +185,4 @@ would cause all steps to fail.
 | `self.status`                      | `Status`            | Lifecycle status                                       |
 | `self.logger`                      | `loguru.Logger`     | Generator-scoped logger                                |
 | `self.services`                    | namespace           | All framework services                                 |
-| `self.creating_agent_template`     | `BaseAgentTemplate` | Template that created this generator (class attribute) |
+| `self.creating_agent_template`     | `BaseAgentTemplate` | Template bound to this instance by `create_agent_generator()` |

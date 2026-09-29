@@ -138,8 +138,9 @@ class BaseAgentCapability(_AgentCommunicator):
             capability. Resolved to MitreAttackTechnique objects at definition time.
         validating_function: Optional single-argument callable that validates the full
             resolved option set before execution.
-        task_launch_message: The message sent to the agent on the most recent execute()
-            call; set by execute() after on_launch completes.
+        task_launch_message: A copy of the incoming message captured by the most recent
+            execute() call before on_launch runs. Changes or replacement messages
+            returned by on_launch are not reflected in this snapshot.
     """
 
     name: str

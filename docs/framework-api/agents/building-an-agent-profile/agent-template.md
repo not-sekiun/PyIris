@@ -29,8 +29,11 @@ class AgentTemplate(BaseAgentTemplate):
     compatible_listener_types = {"tcp_json"}
 ```
 
-`agent_generator` and `agent_type` must be the classes themselves, not instances. The
-framework sets `creating_agent_template` on the `AgentGenerator` class at load time.
+`agent_generator` and `agent_type` must be the classes themselves, not instances.
+`create_agent_generator()` binds each generator to its `creating_agent_template`.
+The generator's `agent_type` and `compatible_listener_types` properties read from
+that template. Read these values from the created instance, since multiple templates
+can share the same generator class.
 
 ## compatible_listener_types
 

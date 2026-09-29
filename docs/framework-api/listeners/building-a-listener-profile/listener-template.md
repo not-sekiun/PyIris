@@ -26,9 +26,12 @@ class ListenerTemplate(BaseListenerTemplate):
 ```
 
 `listener` and `listener_type` are the two framework-required class attributes. Both
-must be the classes themselves, not instances. The framework sets
-`creating_listener_template` on the `Listener` class at load time to link the template
-back to the instance that produced it.
+must be the classes themselves, not instances. `create_listener()` binds
+`creating_listener_template` on each new listener after its constructor returns.
+The listener's `listener_type` property reads the type from that creating template,
+so templates can share a listener class while each instance retains its own binding.
+Read this metadata from the created instance; it is not available through the binding
+inside the listener's constructor.
 
 ## Options
 
@@ -76,9 +79,12 @@ builds, and the framework will treat it as an ordinary option with no special me
 |--------------------------------|-------------------------------|------------------------------------------------------------------------------------------------------------|
 | `SingleValueOption`            | `str`, `int`, `float`, `bool` | `greater_than`, `less_than`, `minimum_length`, `maximum_length`, `validating_regex`, `validating_function` |
 | `ListValueOption`              | List of primitive             | `allow_duplicates`, `validating_regex`, `validating_function` per element                                  |
-| `ChoiceValueOption`            | One of a set of strings       | `available_values`                                                                                         |
+| `ChoiceValueOption`            | One primitive (`str`, `int`, `float`, `bool`) | `available_values`                                                                              |
 | `DictionaryValueOption`        | `dict[str, primitive]`        | `value_type` for all values                                                                                |
-| `ToggleableChoicesValueOption` | Subset of declared choices    | `available_values`                                                                                         |
+| `ToggleableChoicesValueOption` | `dict[str, bool]`             | Keys must be declared in `available_values`; values toggle each choice                                     |
+
+For example, a toggleable choice value is `{"feature_a": true, "feature_b": false}`
+in JSON, rather than a list of selected names.
 
 ## Cross-field validation
 

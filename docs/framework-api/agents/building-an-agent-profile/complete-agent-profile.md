@@ -57,7 +57,9 @@ class DownloadCapability(BaseAgentCapability):
             if not msg.success:
                 return Failure(task_output_message=msg)
             if msg.data.get("type") == "chunk":
-                chunks.append(msg.payload.data)
+                if msg.payload is None:
+                    return Failure(message="Chunk message has no payload.")
+                chunks.append(await msg.payload.read())
             elif msg.data.get("type") == "end_of_transfer":
                 break
         self.event_logger.artifact(message=f"Downloaded '{header.data['path']}'")

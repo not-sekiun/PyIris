@@ -186,7 +186,7 @@ information about what _exactly_ failed you have to start the server in debug mo
 running the server with the `-d` or `--debug` flag.
 
 ```shell title="Start the server in debug mode"
-uv run python consortium.py -d
+uv run consortium.py server -d
 ```
 
 ## Putting it all together

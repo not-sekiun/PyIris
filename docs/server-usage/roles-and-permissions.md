@@ -115,13 +115,15 @@ REST API endpoint (or Events WebSockets API) they authorize.
 | `READ_ALL_AGENTS`                              | Read all agents.                                     |
 | `READ_AGENT_BY_AGENT_ID`                       | Read an agent by its agent ID.                       |
 | `READ_ALL_AGENT_TASKS`                         | Read all agent tasks.                                |
-| `READ_ALL_AGENT_TASKS_BY_AGENT_ID`             | Read all tasks for a given agent.                    |
-| `READ_AGENT_TASK_BY_AGENT_ID_AND_TASK_ID`      | Read a specific task for a given agent.              |
 | `READ_AGENT_TASK_BY_TASK_ID`                   | Read an agent task by its task ID.                   |
 | `TASK_AGENT_BY_AGENT_ID`                       | Task an agent by its agent ID.                       |
 | `UPDATE_AGENT_BY_AGENT_ID`                     | Update an agent by its agent ID.                     |
 | `DELETE_AGENT_BY_AGENT_ID`                     | Delete an agent by its agent ID.                     |
 | `DELETE_AGENT_TASK_BY_TASK_ID`                 | Delete an agent task by its task ID.                 |
+
+`READ_ALL_AGENT_TASKS` also permits filtering the task list by agent. Reading one
+task uses `READ_AGENT_TASK_BY_TASK_ID`, including when that task belongs to a
+particular agent; there are no separate permissions for these agent filters.
 
 ### Events WebSockets API
 

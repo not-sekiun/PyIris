@@ -105,9 +105,11 @@ class BaseListener(ComponentLifeCycle):
     ) -> None:
         """Initialize a listener instance with the specified configuration.
 
-        While this constructor can be called directly, it is strongly recommended to
-        create listeners through their associated listener templates. Templates ensure
-        proper validation of parameters and configuration before instantiation.
+        Create listeners through their associated template's `create_listener()`
+        method to validate parameters and bind the creating template. Direct
+        construction leaves the listener unbound, so `listener_type` and serialization
+        are unavailable. The factory binds the template after this constructor returns;
+        constructor overrides must not rely on that binding.
 
         Args:
             name: Human-readable name for identifying this listener. When `None` a

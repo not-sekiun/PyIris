@@ -10,7 +10,7 @@ docs_dir = "docs"
 site_dir = "site"
 copyright = "&copy; 2026 not-sekiun"
 
-repo_url = "https://github.com/not-sekiun/PyIris"
+repo_url = "https://github.com/not-sekiun/Consortium"
 repo_name = "not-sekiun/Consortium"
 edit_uri = "docs/"
 

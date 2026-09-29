@@ -140,7 +140,9 @@ class DownloadFile(BaseAgentCapability):
 
             match response.data.get("type"):
                 case "chunk":
-                    downloaded += len(response.payload.data)
+                    if response.payload is None:
+                        return Failure(message="Chunk message has no payload.")
+                    downloaded += response.payload.size
                     self.event_logger.update_progress(
                         message=f"Downloading {file_path.name}",
                         percent_complete=downloaded / file_size * 100 if file_size else 0,
